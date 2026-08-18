@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 export async function GET(
   req: NextRequest,
@@ -8,12 +12,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const filePath = path.join(process.cwd(), "executions.json");
 
     try {
-      const fileData = await fs.readFile(filePath, "utf-8");
-      const allExecutions = JSON.parse(fileData);
-      const state = allExecutions[id];
+      const state = await redis.get(`execution:${id}`);
 
       if (!state) {
         return NextResponse.json({ error: "Execution not found" }, { status: 404 });
@@ -21,7 +22,7 @@ export async function GET(
 
       return NextResponse.json(state);
     } catch (e) {
-      return NextResponse.json({ error: "No executions file found" }, { status: 404 });
+      return NextResponse.json({ error: "Failed to connect to Redis" }, { status: 500 });
     }
   } catch (error) {
     return NextResponse.json({ error: "Failed to get status" }, { status: 500 });

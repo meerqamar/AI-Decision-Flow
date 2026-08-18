@@ -1,7 +1,11 @@
 import { inngest } from "./client";
 import { askGeminiYesNo } from "@/lib/gemini";
-import fs from "fs/promises";
-import path from "path";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 type WorkflowPayload = {
   workflowId: string;
@@ -15,8 +19,6 @@ export const runAiWorkflow = inngest.createFunction(
   async ({ event, step }) => {
     const { workflowId, nodes, edges, startNodeId } = event.data as WorkflowPayload;
 
-    const getExecutionFilePath = () => path.join(process.cwd(), "executions.json");
-
     // Initialize execution state
     await step.run("init-execution-state", async () => {
       const state = {
@@ -27,15 +29,7 @@ export const runAiWorkflow = inngest.createFunction(
         visitedNodes: [startNodeId],
       };
       
-      let allExecutions: any = {};
-      try {
-        const fileData = await fs.readFile(getExecutionFilePath(), "utf-8");
-        allExecutions = JSON.parse(fileData);
-      } catch (e) {
-        // File might not exist yet
-      }
-      allExecutions[workflowId] = state;
-      await fs.writeFile(getExecutionFilePath(), JSON.stringify(allExecutions, null, 2));
+      await redis.set(`execution:${workflowId}`, state);
       return state;
     });
 
@@ -94,24 +88,23 @@ export const runAiWorkflow = inngest.createFunction(
 
       // Update state
       await step.run(`update-state-${stepCount}`, async () => {
-        let allExecutions: any = {};
-        try {
-          const fileData = await fs.readFile(getExecutionFilePath(), "utf-8");
-          allExecutions = JSON.parse(fileData);
-        } catch (e) {}
-
-        const state = allExecutions[workflowId];
+        const state: any = await redis.get(`execution:${workflowId}`) || {};
 
         if (stepResult.error) {
           state.status = "ERROR";
+          state.logs = state.logs || [];
           state.logs.push(`Error: ${stepResult.error}`);
         } else if (stepResult.done) {
           state.status = "COMPLETED";
+          state.logs = state.logs || [];
           state.logs.push(`Workflow reached result: ${stepResult.result}`);
         } else {
           state.currentNodeId = stepResult.nextNodeId;
+          state.visitedEdges = state.visitedEdges || [];
           state.visitedEdges.push(stepResult.edgeId);
+          state.visitedNodes = state.visitedNodes || [];
           state.visitedNodes.push(stepResult.nextNodeId);
+          state.logs = state.logs || [];
           if (stepResult.decision !== "START") {
             state.logs.push(`Node Evaluated. AI decided: ${stepResult.decision}`);
           } else {
@@ -119,8 +112,7 @@ export const runAiWorkflow = inngest.createFunction(
           }
         }
 
-        allExecutions[workflowId] = state;
-        await fs.writeFile(getExecutionFilePath(), JSON.stringify(allExecutions, null, 2));
+        await redis.set(`execution:${workflowId}`, state);
       });
 
       if (stepResult.done || stepResult.error) {
