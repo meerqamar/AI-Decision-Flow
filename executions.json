@@ -1,0 +1,85 @@
+{
+  "wf_1787058040603_0sw0j9": {
+    "status": "RUNNING",
+    "logs": [
+      "Workflow Started"
+    ],
+    "currentNodeId": "decision-1787052892724",
+    "visitedEdges": [
+      "xy-edge__start-decision-1787052892724"
+    ],
+    "visitedNodes": [
+      "start",
+      "decision-1787052892724"
+    ]
+  },
+  "wf_1787058553543_3w5yqi": {
+    "status": "ERROR",
+    "logs": [
+      "Workflow Started",
+      "Error: Gemini API Error: response.text is not a function"
+    ],
+    "currentNodeId": "decision-1787052892724",
+    "visitedEdges": [
+      "xy-edge__start-decision-1787052892724"
+    ],
+    "visitedNodes": [
+      "start",
+      "decision-1787052892724"
+    ]
+  },
+  "wf_1787058675025_0371d3": {
+    "status": "COMPLETED",
+    "logs": [
+      "Workflow Started",
+      "Node Evaluated. AI decided: NO",
+      "Workflow reached result: \"Support Desk\", \"Sales Team\""
+    ],
+    "currentNodeId": "result-1787052978342",
+    "visitedEdges": [
+      "xy-edge__start-decision-1787052892724",
+      "xy-edge__decision-1787052892724no-result-1787052978342"
+    ],
+    "visitedNodes": [
+      "start",
+      "decision-1787052892724",
+      "result-1787052978342"
+    ]
+  },
+  "wf_1787058990127_wl6cwn": {
+    "status": "COMPLETED",
+    "logs": [
+      "Workflow Started",
+      "Node Evaluated. AI decided: YES",
+      "Workflow reached result: \"Support Desk\", \"Sales Team\""
+    ],
+    "currentNodeId": "result-1787052978342",
+    "visitedEdges": [
+      "xy-edge__start-decision-1787052892724",
+      "xy-edge__decision-1787052892724yes-result-1787052978342"
+    ],
+    "visitedNodes": [
+      "start",
+      "decision-1787052892724",
+      "result-1787052978342"
+    ]
+  },
+  "wf_1787060681908_ljs3sh": {
+    "status": "COMPLETED",
+    "logs": [
+      "Workflow Started",
+      "Node Evaluated. AI decided: YES",
+      "Workflow reached result: \"Support Desk\", \"Sales Team\""
+    ],
+    "currentNodeId": "result-1787052978342",
+    "visitedEdges": [
+      "xy-edge__start-decision-1787052892724",
+      "xy-edge__decision-1787052892724yes-result-1787052978342"
+    ],
+    "visitedNodes": [
+      "start",
+      "decision-1787052892724",
+      "result-1787052978342"
+    ]
+  }
+}
