@@ -15,6 +15,7 @@ AI Decision Flow allows you to visually construct decision trees on a canvas, wh
 ##  Tech Stack
 
 - **Framework:** Next.js 15 (App Router)
+- **Database:** Upstash Redis (Serverless KV)
 - **Workflow Engine:** Inngest
 - **Visualizer:** React Flow (`@xyflow/react`)
 - **AI SDK:** Google Gen AI SDK (`@google/genai`)
@@ -36,11 +37,17 @@ npm install
 
 ### 2. Environment Variables
 
-Create a `.env.local` file in the root of the project and add your Gemini API key:
+Create a `.env.local` file in the root of the project and add your required keys:
 
 ```env
+# Google Gemini API
 GEMINI_API_KEY=your_gemini_api_key_here
+
+# Upstash Redis / Vercel KV Database
+KV_REST_API_URL=your_redis_url_here
+KV_REST_API_TOKEN=your_redis_token_here
 ```
+> Note: If you are deploying on Vercel, you can link a Redis/Upstash database from the Vercel dashboard and run `npx vercel env pull` to automatically configure these variables locally.
 
 ### 3. Running the Application
 
@@ -66,6 +73,6 @@ npx inngest-cli@latest dev
 4. Connect the **YES** and **NO** handles to your desired **Result Nodes**.
 5. Click **Execute** and watch the execution logs trace the AI's decision dynamically!
 
-## 📝 License
+##  License
 
 This project is licensed under the MIT License.
